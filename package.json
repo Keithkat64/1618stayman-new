@@ -1,0 +1,12 @@
+{
+  "name": "1618stayman",
+  "version": "1.0.0",
+  "description": "Bridge AI for practicing responses to 1NT (16–18)",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": ["bridge", "1NT", "Stayman", "transfers"],
+  "author": "Keith",
+  "license": "MIT"
+}
