@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>1NT 16–18 Stayman Practice</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap');
+
+    body {
+      font-family: 'Lato', sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #f9f9f9;
+    }
+
+    .bridge-button {
+      background: linear-gradient(180deg, #ffd77b 0%, #ffb347 100%);
+      border: 2px solid #000;
+      border-radius: 15px;
+      padding: 12px 24px;
+      font-size: 17px;
+      font-family: 'Lato', sans-serif;
+      cursor: pointer;
+      margin: 10px;
+      transition: background 0.3s ease;
+    }
+
+    .bridge-button:hover {
+      background: linear-gradient(180deg, #ffb347 0%, #ffd77b 100%);
+    }
+
+    .hand-display {
+      font-family: monospace;
+      margin: 30px 0;
+      line-height: 1.5em;
+    }
+
+    #bidding-section {
+      margin-top: 30px;
+    }
+
+    #next-bid-box {
+      margin-top: 30px;
+    }
+
+    #message {
+      margin-top: 20px;
+      font-size: 16px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Practice Responding to 1NT (16–18)</h1>
+
+  <button id="startBtn" class="bridge-button" onclick="startPractice()">Start Now</button>
+
+  <div class="hand-display" id="responderHand"></div>
+
+  <div id="staymanTransferButtons">
+    <button class="bridge-button" onclick="chooseStayman()">Stayman?</button>
+    <button class="bridge-button" onclick="chooseTransfers()">Transfers?</button>
+  </div>
+
+  <div id="bidding-section"></div>
+  <div id="next-bid-box"></div>
+  <div id="message"></div>
+
+  <script type="module">
+    import { generateHands } from './keith-ai-logic.js';
+
+    let currentHands = {};
+
+    function formatHand(hand) {
+      const suits = { '♠': [], '♥': [], '♦': [], '♣': [] };
+      hand.forEach(card => {
+        suits[card.slice(-1)].push(card.slice(0, -1));
+      });
+
+      return `
+        ♠ ${suits['♠'].join(' ')}<br>
+        ♥ ${suits['♥'].join(' ')}<br>
+        ♦ ${suits['♦'].join(' ')}<br>
+        ♣ ${suits['♣'].join(' ')}
+      `;
+    }
+
+    window.startPractice = function () {
+      const { opener, responder } = generateHands();
+      currentHands = { opener, responder };
+      document.getElementById('responderHand').innerHTML = formatHand(responder);
+      document.getElementById('staymanTransferButtons').style.display = 'block';
+      document.getElementById('bidding-section').innerHTML = '';
+      document.getElementById('next-bid-box').innerHTML = '';
+      document.getElementById('message').innerText = '';
+    };
+
+    window.chooseStayman = function () {
+      const suits = countSuits(currentHands.responder);
+      if (suits['♠'] >= 5 || suits['♥'] >= 5) {
+        document.getElementById('message').innerText = "Keith would choose transfers here";
+        chooseTransfers(); // Redirect to transfers
+        return;
+      }
+      if ((suits['♠'] === 4 || suits['♥'] === 4)) {
+        document.getElementById('staymanTransferButtons').style.display = 'none';
+        document.getElementById('bidding-section').innerHTML = '<strong>You:</strong> 2C<br>';
+        // Logic module would continue from here
+      } else {
+        document.getElementById('message').innerText = "Stayman not suitable for this hand.";
+      }
+    };
+
+    window.chooseTransfers = function () {
+      const suits = countSuits(currentHands.responder);
+      if (suits['♠'] < 5 && suits['♥'] < 5) {
+        document.getElementById('message').innerText = "Keith thinks that this hand is better bid as a stayman hand.";
+        chooseStayman();
+        return;
+      }
+      document.getElementById('staymanTransferButtons').style.display = 'none';
+      document.getElementById('bidding-section').innerHTML = '<strong>You:</strong> 2D or 2H (based on your hand)<br>';
+      // Logic module would continue from here
+    };
+
+    function countSuits(hand) {
+      return hand.reduce((acc, card) => {
+        const suit = card.slice(-1);
+        acc[suit] = (acc[suit] || 0) + 1;
+        return acc;
+      }, {});
+    }
+  </script>
+
+</body>
+</html>
